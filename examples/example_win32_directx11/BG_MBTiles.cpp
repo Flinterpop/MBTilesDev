@@ -374,7 +374,7 @@ bool bg_CreateDTED0Table()
         std::string sql =
             "CREATE TABLE " + b + " ("
             "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-            "ns TEXT NOT NULL, "
+            //"ns TEXT NOT NULL, "
             "dted BLOB NOT NULL"
             ");";
 
@@ -392,5 +392,88 @@ bool bg_CreateDTED0Table()
     printf("\tCreated DB: %s\r\n", AppIni_dbName.c_str());
 
     return true;
+}
+
+
+bool insertDTEDBlob(std::vector<char> blob)
+{
+    std::string AppIni_dbName = "DTED0Blob.db";
+
+    sqlite3* db;
+    char* zErrMsg = 0;
+    int rc = sqlite3_open(AppIni_dbName.c_str(), &db);
+    if (rc)
+    {
+        printf("\tCan't open database: %s", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return false;
+    }
+
+
+    // Prepare statement
+    sqlite3_stmt* stmt;
+    const char* insert_sql = "INSERT INTO w104 (dted) VALUES (?);";
+
+    //"INSERT INTO images (name, data) VALUES (?, ?);";
+
+    rc = sqlite3_prepare_v2(db, insert_sql, -1, &stmt, nullptr);
+    //int rc = sqlite3_prepare_v2(db, insert_sql, -1, nullptr, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        //sqlite3_close(db);
+        return 1;
+    }
+
+    // Bind BLOB data
+    rc = sqlite3_bind_blob(stmt, 1, blob.data(), static_cast<int>(blob.size()), SQLITE_STATIC);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Failed to bind blob: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        //sqlite3_close(db);
+        return 1;
+    }
+
+    // Execute statement
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        std::cerr << "Execution failed: " << sqlite3_errmsg(db) << std::endl;
+    }
+    else {
+        std::cout << "BLOB inserted successfully." << std::endl;
+    }
+
+    // Finalize statement and close database
+    sqlite3_finalize(stmt);
+    //sqlite3_close(m_db);
+
+
+}
+
+
+
+#include <fstream>
+
+
+// Function to read a file into a vector of characters (blob)
+std::vector<char> readFileAsBlob(std::string& filePath) {
+    std::ifstream file(filePath, std::ios::binary | std::ios::ate); // Open in binary mode and go to end
+    if (!file.is_open()) {
+        std::cerr << "Error: Could not open file " << filePath << std::endl;
+        return {}; // Return empty vector on error
+    }
+
+    std::streamsize size = file.tellg(); // Get file size
+    printf("File %s is size %d\r\n", filePath.c_str(), (int)size);
+    file.seekg(0, std::ios::beg); // Go back to beginning
+
+    std::vector<char> buffer(size); // Create buffer of appropriate size
+    if (!file.read(buffer.data(), size)) { // Read entire file into buffer
+        std::cerr << "Error: Could not read file " << filePath << std::endl;
+        return {}; // Return empty vector on error
+    }
+
+    std::cout << "File read successfully. Size: " << size << " bytes." << std::endl;
+
+    return buffer;
 }
 

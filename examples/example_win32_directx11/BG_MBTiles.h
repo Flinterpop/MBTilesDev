@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 #include <d3d11.h>
 
 
@@ -26,3 +27,5 @@ Bounds GetMBTilesBounds();
 //DTED
 
 bool bg_CreateDTED0Table();
+std::vector<char> readFileAsBlob(std::string& filePath);
+bool insertDTEDBlob(std::vector<char> blob);

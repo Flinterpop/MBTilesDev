@@ -32,8 +32,8 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
 #include "BG_MBTiles.h"
-#include <ostream>
-#include <iostream>
+#include <vector>
+
 
 void MBTileTest()
 {
@@ -50,7 +50,12 @@ void MBTileTest()
     static ID3D11ShaderResourceView* my_texture;
     if (false == ranOnce )
     {
-        bg_CreateDTED0Table();
+        //bg_CreateDTED0Table();
+        std::string filename = "w105\\n47.dt0";
+
+        std::vector<char> blob = readFileAsBlob(filename);
+        insertDTEDBlob(blob);
+
 
         my_texture = NULL;
         ranOnce = true;
