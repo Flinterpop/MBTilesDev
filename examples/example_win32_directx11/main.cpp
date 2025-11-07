@@ -32,28 +32,45 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
 #include "BG_MBTiles.h"
+#include <ostream>
+#include <iostream>
 
 void MBTileTest()
 {
+    static bool ranOnce = false;
+
+    static std::string MBTilesName{};
+    static Bounds bounds{};
+    static int numTiles{};
+
     static int idx_col = 148;
     static int idx_row = 328;
     static int zoom = 9;
-    static bool ranOnce = false;
+
     static ID3D11ShaderResourceView* my_texture;
     if (false == ranOnce )
     {
+        bg_CreateDTED0Table();
+
         my_texture = NULL;
         ranOnce = true;
         SetMBTilesDataBaseByFileName("Ottawa_Imagery_NRC.mbtiles", g_pd3dDevice);
         my_texture = get_MBTile(zoom, idx_col, idx_row);
+
+        get_MBTileName(MBTilesName);
+        bounds = GetMBTilesBounds();
+        get_NumTiles(numTiles);
     }
 
 
-    ImGui::Begin("DirectX11 Texture Test");
+    ImGui::Begin("DirectX11 MBTiles Test");
     static int nextZ = zoom;
     static int nextCol = idx_col;
     static int nextRow = idx_row;
 
+    ImGui::Text("MBTiles name: %s", MBTilesName.c_str());
+    ImGui::Text("Num tiles: %d", numTiles);
+    ImGui::Text("Bounds: %f, %f, %f, %f", bounds.left, bounds.bottom, bounds.right, bounds.top);
     ImGui::InputInt("Zoom", &nextZ);
     ImGui::InputInt("Col", &nextCol);
     ImGui::InputInt("Row", &nextRow);

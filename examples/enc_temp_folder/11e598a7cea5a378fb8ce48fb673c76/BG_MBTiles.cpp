@@ -364,7 +364,7 @@ bool bg_CreateDTED0Table()
 
     //Create Application  INT table
 
-    for (int e = 0;e < 179;e++)
+    for (int e = 0;e < 359;e++)
     {
 
         char buf[10];
